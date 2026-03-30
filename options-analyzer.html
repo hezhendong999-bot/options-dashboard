@@ -660,9 +660,11 @@ function updateCloudUI() {
   if (currentUser) {
     badge.innerHTML = `${currentUser.email} <span style="color:var(--red);cursor:pointer" onclick="event.stopPropagation();cloudSignOut()">✕</span>`;
     setCloudStatus('synced');
+    hideAuthModal();
   } else {
     badge.innerHTML = '<span style="cursor:pointer" onclick="showAuthModal()">Sign In</span>';
     setCloudStatus('offline');
+    showAuthModal();
   }
 }
 
@@ -960,9 +962,8 @@ function addStratToPaper(s){if(!s)return;const tk=document.getElementById('ticke
 function runBTCWhatIf(){const t1=parseFloat(document.getElementById('btcTarget1').value)||150000;const t2=parseFloat(document.getElementById('btcTarget2').value)||200000;const sharesData={'MSTR':284376000,'ASST':70000000,'MARA':378184000,'RIOT':379126000,'IREN':332280000,'CLSK':263000000,'HUT':97000000,'BITF':461000000,'WULF':197000000,'CIFR':350000000};if(!navTreasuryData||!navTreasuryData.companies){document.getElementById('whatIfResults').innerHTML='<div class="warning">Refresh NAV data first (click 🔄 Refresh NAV above).</div>';return;}const wlTickers=watchlist.map(t=>t.toUpperCase());const results=[];navTreasuryData.companies.forEach(co=>{const sym=(co.symbol||'').replace('.US','').toUpperCase();if(!wlTickers.includes(sym))return;const totalBTC=co.total_holdings||0;const shares=sharesData[sym]||0;if(!shares||!totalBTC)return;const btcPerShare=totalBTC/shares;const d=wlData[sym]||{};const curPrice=d.price||0;if(!curPrice)return;const curBTCPrice=88000;const curNAV=btcPerShare*curBTCPrice;const curMNAV=curNAV>0?curPrice/curNAV:0;const nav1=btcPerShare*t1;const nav2=btcPerShare*t2;const proj1=nav1*curMNAV;const proj2=nav2*curMNAV;const upside1=curPrice>0?((proj1-curPrice)/curPrice)*100:0;const upside2=curPrice>0?((proj2-curPrice)/curPrice)*100:0;results.push({sym,totalBTC,btcPerShare,curPrice,curNAV,curMNAV,nav1,nav2,proj1,proj2,upside1,upside2});});if(results.length===0){document.getElementById('whatIfResults').innerHTML='<div style="color:var(--muted);text-align:center;padding:15px">No BTC treasury tickers in watchlist with data. Add MSTR, MARA, IREN, etc.</div>';return;}let html='<div style="overflow-x:auto"><table class="wt-table"><thead><tr><th>Ticker</th><th>Current</th><th>mNAV</th><th>NAV @$'+t1.toLocaleString()+'</th><th>Proj Price</th><th>Upside</th><th>NAV @$'+t2.toLocaleString()+'</th><th>Proj Price</th><th>Upside</th></tr></thead><tbody>';results.forEach(r=>{html+=`<tr><td style="font-weight:700;color:var(--cyan)">${r.sym}</td><td>$${r.curPrice.toFixed(2)}</td><td style="color:var(--purple)">${r.curMNAV.toFixed(2)}x</td><td style="color:var(--blue)">$${r.nav1.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.proj1.toFixed(2)}</td><td style="font-weight:700;color:${r.upside1>=0?'var(--green)':'var(--red)'}">${r.upside1>=0?'+':''}${r.upside1.toFixed(0)}%</td><td style="color:var(--blue)">$${r.nav2.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.proj2.toFixed(2)}</td><td style="font-weight:700;color:${r.upside2>=0?'var(--green)':'var(--red)'}">${r.upside2>=0?'+':''}${r.upside2.toFixed(0)}%</td></tr>`;});html+='</tbody></table></div>';html+='<div style="font-size:10px;color:var(--muted);margin-top:8px">⚠️ Projected prices assume current mNAV multiple (premium/discount) stays constant. Actual prices will vary based on market sentiment, dilution, and operations.</div>';document.getElementById('whatIfResults').innerHTML=html;}
 </script>
 <!-- Auth Modal -->
-<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center">
+<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px)">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:340px;max-width:90vw;position:relative">
-    <button onclick="hideAuthModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1" title="Close">✕</button>
     <h3 style="color:var(--cyan);margin-bottom:15px;font-size:18px">🔐 Options Command Center</h3>
     <div id="authError" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:8px;margin-bottom:12px;font-size:12px;color:var(--red)"></div>
     <button onclick="googleSignIn()" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:15px">
@@ -978,7 +979,7 @@ function runBTCWhatIf(){const t1=parseFloat(document.getElementById('btcTarget1'
     <div class="ig" style="margin-bottom:15px"><label>Password</label><input type="password" id="authPass" style="width:100%" onkeydown="if(event.key==='Enter')cloudLogin()"></div>
     <button class="btn btn-p" onclick="cloudLogin()" style="width:100%;margin-bottom:8px" id="authLoginBtn">Sign In</button>
     <div style="display:flex;justify-content:space-between">
-      <button style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer" onclick="hideAuthModal()">Skip (offline mode)</button>
+      <span style="font-size:11px;color:var(--muted)">Login required to use this tool</span>
       <button style="background:none;border:none;color:var(--cyan);font-size:11px;cursor:pointer" onclick="cloudResetPassword()">Forgot password?</button>
     </div>
   </div>
