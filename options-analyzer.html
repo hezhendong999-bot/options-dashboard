@@ -517,9 +517,9 @@ textarea:focus{outline:none;border-color:var(--cyan)}
 // CLOUD INFRASTRUCTURE — Supabase + Worker Proxy
 // ============================================
 // >>> CONFIGURE THESE 3 VALUES <<<
-const SUPABASE_URL = 'https://wvfvcumwcptkagblnlsh.supabase.co';  
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2ZnZjdW13Y3B0a2FnYmxubHNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjcyMjQsImV4cCI6MjA5MDQwMzIyNH0.saeKaD06Qu6UtSrG35eKLHI3xsYJ8TtiobtUNNmx_jo';       
-const OCC_PROXY_URL = 'https://wvfvcumwcptkagblnlsh.supabase.co'; 
+const SUPABASE_URL = 'https://wvfvcumwcptkagblnlsh.supabase.co';  // Replace with your Supabase URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2ZnZjdW13Y3B0a2FnYmxubHNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjcyMjQsImV4cCI6MjA5MDQwMzIyNH0.saeKaD06Qu6UtSrG35eKLHI3xsYJ8TtiobtUNNmx_jo';       // Replace with your anon key
+const OCC_PROXY_URL = 'https://occ-proxy.hezhendong999.workers.dev'; // Replace with your Worker URL
 
 let currentUser = null;
 let _cloudAutoSaveTimer = null;
@@ -755,7 +755,7 @@ async function loadAdminUsers() {
   const body = document.getElementById('adminUsersBody');
   body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr>';
   try {
-    const users = await sbRequest('/rest/v1/profiles?select=*&order=created_at.asc');
+    const users = await sbRequest('/rest/v1/rpc/get_all_profiles', { method: 'POST', body: {} });
     if (!users || users.length === 0) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">No users found</td></tr>'; return; }
     body.innerHTML = users.map(u => {
       const isMe = u.id === currentUser.id;
@@ -961,7 +961,8 @@ function runBTCWhatIf(){const t1=parseFloat(document.getElementById('btcTarget1'
 </script>
 <!-- Auth Modal -->
 <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:340px;max-width:90vw">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:340px;max-width:90vw;position:relative">
+    <button onclick="hideAuthModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1" title="Close">✕</button>
     <h3 style="color:var(--cyan);margin-bottom:15px;font-size:18px">🔐 Options Command Center</h3>
     <div id="authError" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:8px;margin-bottom:12px;font-size:12px;color:var(--red)"></div>
     <button onclick="googleSignIn()" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:15px">
